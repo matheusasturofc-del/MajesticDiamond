@@ -1,26 +1,23 @@
-"""Confere o pack e gera dist/MajesticDiamond.zip pronto para o Minecraft 1.6.
+"""Confere o pack e gera dist/MajesticDiamond.zip pronto para o Minecraft 1.8.
 
 Uso:
-    python ferramentas/empacotar.py                # confere e gera o zip
-    python ferramentas/empacotar.py --jar CAMINHO  # confere os nomes contra o seu 1.6.x.jar
-    python ferramentas/empacotar.py --instalar     # também copia o zip para .minecraft/resourcepacks
-    python ferramentas/empacotar.py --forcar       # gera o zip mesmo com erros
+    python ferramentas/empacotar.py             # confere e gera o zip
+    python ferramentas/empacotar.py --instalar  # também copia o zip para .minecraft/resourcepacks
+    python ferramentas/empacotar.py --forcar    # gera o zip mesmo com erros
 
-Se o .jar do 1.6 for encontrado sozinho em .minecraft/versions, ele é usado
-para conferir se cada arquivo do pack tem um nome que o jogo realmente usa.
+Os nomes e tamanhos são conferidos contra a lista de texturas do 1.8
+(texturas_1_8.txt), então não precisa do .jar.
 """
 
 import argparse
 import difflib
-import io
 import json
 import shutil
 import sys
 import zipfile
-from pathlib import Path
 
-from comum import (DIST, NOME_ZIP, NOMES_1_7_PARA_1_6, PACK, TEXTURAS,
-                   achar_jar, arquivos_do_pack, ler_jar, pastas_minecraft)
+from comum import (DIST, NOME_ZIP, PACK, TEXTURAS, arquivos_do_pack,
+                   ler_lista_1_8, pastas_minecraft, sugerir_nome_1_8)
 
 try:
     from PIL import Image
@@ -66,10 +63,10 @@ def conferir_mcmeta_do_pack(rel):
         rel.erro("pack.mcmeta", f"JSON inválido ({e})")
         return
     if formato != 1:
-        rel.erro("pack.mcmeta", f"pack_format é {formato}, mas o 1.6 usa 1")
+        rel.erro("pack.mcmeta", f"pack_format é {formato}, mas o 1.8 usa 1")
 
 
-def conferir_imagem(rel, nome, caminho, vanilla):
+def conferir_imagem(rel, nome, caminho, tamanho_original):
     try:
         with Image.open(caminho) as img:
             img.load()
@@ -92,17 +89,16 @@ def conferir_imagem(rel, nome, caminho, vanilla):
                 rel.erro(nome, f"{largura}x{altura} é uma animação, mas falta {caminho.name}.mcmeta")
         return
 
-    if vanilla is None:
+    if tamanho_original is None:
         return
-    with Image.open(io.BytesIO(vanilla)) as original:
-        vl, va = original.size
+    vl, va = tamanho_original
     if largura * va != altura * vl:
         rel.erro(nome, f"{largura}x{altura}, mas o original é {vl}x{va}; mantenha a proporção")
     elif not escala_valida(largura, vl):
         rel.aviso(nome, f"{largura}x{altura}: use o tamanho original ({vl}x{va}) multiplicado por 2, 4, 8...")
 
 
-def conferir_arquivos(rel, texturas_jar):
+def conferir_arquivos(rel, texturas_1_8):
     arquivos = arquivos_do_pack()
     if not (PACK / "pack.png").is_file():
         rel.aviso("pack.png", "sem ícone; o pack aparece com o ícone padrão na lista")
@@ -121,16 +117,17 @@ def conferir_arquivos(rel, texturas_jar):
             continue
 
         nome = caminho.relative_to(TEXTURAS).as_posix()
-        if nome in NOMES_1_7_PARA_1_6:
-            rel.erro(nome, f"nome do 1.7+; no 1.6 o arquivo se chama {NOMES_1_7_PARA_1_6[nome]}")
-            continue
-        if texturas_jar is not None and nome not in texturas_jar:
-            parecidos = difflib.get_close_matches(nome, texturas_jar.keys(), n=3)
-            dica = f" Você quis dizer: {', '.join(parecidos)}?" if parecidos else ""
-            rel.erro(nome, f"o 1.6 não usa esse arquivo, então ele será ignorado.{dica}")
+        if nome not in texturas_1_8:
+            sugestao = sugerir_nome_1_8(nome)
+            if sugestao in texturas_1_8:
+                rel.erro(nome, f"nome de outra versão; no 1.8 o arquivo se chama {sugestao}")
+            else:
+                parecidos = difflib.get_close_matches(nome, texturas_1_8.keys(), n=3)
+                dica = f" Você quis dizer: {', '.join(parecidos)}?" if parecidos else ""
+                rel.erro(nome, f"o 1.8 não usa esse arquivo, então ele será ignorado.{dica}")
             continue
         if caminho.suffix == ".png" and Image is not None:
-            conferir_imagem(rel, nome, caminho, texturas_jar.get(nome) if texturas_jar else None)
+            conferir_imagem(rel, nome, caminho, texturas_1_8[nome])
     return arquivos
 
 
@@ -156,25 +153,16 @@ def instalar(zip_gerado):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--jar", type=Path, help="caminho do 1.6.x.jar para conferir os nomes")
     parser.add_argument("--instalar", action="store_true", help="copia o zip para .minecraft/resourcepacks")
     parser.add_argument("--forcar", action="store_true", help="gera o zip mesmo com erros")
     args = parser.parse_args()
 
-    jar = args.jar or achar_jar()
-    if args.jar and not args.jar.is_file():
-        sys.exit(f"Arquivo não encontrado: {args.jar}")
-    texturas_jar = ler_jar(jar) if jar else None
-    if jar:
-        print(f"Conferindo nomes contra {jar}")
-    else:
-        print("Aviso: .jar do 1.6 não encontrado; os nomes dos arquivos não serão conferidos (use --jar).")
     if Image is None:
         print("Aviso: Pillow não instalado; tamanhos das imagens não serão conferidos (pip install pillow).")
 
     rel = Relatorio()
     conferir_mcmeta_do_pack(rel)
-    arquivos = conferir_arquivos(rel, texturas_jar)
+    arquivos = conferir_arquivos(rel, ler_lista_1_8())
 
     for msg in rel.avisos:
         print(f"  aviso: {msg}")

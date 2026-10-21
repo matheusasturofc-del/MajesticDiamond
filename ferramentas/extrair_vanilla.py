@@ -1,4 +1,4 @@
-"""Extrai as texturas originais do seu Minecraft 1.6 para usar como base.
+"""Extrai as texturas originais do seu Minecraft 1.8 para usar como base.
 
 Uso:
     python ferramentas/extrair_vanilla.py                 # acha o .jar sozinho
@@ -20,18 +20,18 @@ from comum import REFERENCIA, TEXTURAS, TEXTURAS_PVP, achar_jar, ler_jar
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--jar", type=Path, help="caminho do 1.6.x.jar (padrão: procura em .minecraft/versions)")
+    parser.add_argument("--jar", type=Path, help="caminho do 1.8.x.jar (padrão: procura em .minecraft/versions)")
     parser.add_argument("--pvp", action="store_true", help="copia as texturas de PvP para dentro de pack/")
     parser.add_argument("--sobrescrever", action="store_true", help="com --pvp, substitui arquivos que já existem no pack")
     args = parser.parse_args()
 
     jar = args.jar or achar_jar()
     if jar is None or not jar.is_file():
-        sys.exit("Não achei o .jar do 1.6. Abra o 1.6.4 uma vez no launcher ou passe --jar CAMINHO.")
+        sys.exit("Não achei o .jar do 1.8. Abra o 1.8.9 uma vez no launcher ou passe --jar CAMINHO.")
     print(f"Lendo {jar}")
     texturas = ler_jar(jar)
     if not texturas:
-        sys.exit("Esse .jar não tem assets/minecraft/textures/. Ele é mesmo do 1.6 ou mais novo?")
+        sys.exit("Esse .jar não tem assets/minecraft/textures/. Ele é mesmo do 1.8?")
 
     for nome, dados in texturas.items():
         destino = REFERENCIA / nome
