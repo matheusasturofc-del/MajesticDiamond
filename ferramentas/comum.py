@@ -15,7 +15,8 @@ LISTA_1_8 = Path(__file__).resolve().parent / "texturas_1_8.txt"
 PREFIXO_JAR = "assets/minecraft/textures/"
 VERSOES = ("1.8.9", "1.8.8", "1.8")
 
-# Texturas que mais importam no PvP, como padrões glob relativos a textures/.
+# Texturas que mais importam no PvP, como padrões glob relativos a textures/
+# (o * também casa subpastas).
 TEXTURAS_PVP = [
     # Itens
     "items/*_sword.png",
@@ -48,6 +49,75 @@ TEXTURAS_PVP = [
     "gui/widgets.png",
     "gui/container/inventory.png",
     "misc/enchanted_item_glint.png*",
+]
+
+# Com --servidor, além das de PvP: o resto do que aparece em servidores
+# (lobbies, minigames, bedwars, skywars...): blocos de construção, lã, céu,
+# mobs, baús, partículas, menus e todos os itens.
+TEXTURAS_SERVIDOR = [
+    "items/*",
+    # Blocos de construção e de mapas
+    "blocks/wool_colored_*.png",
+    "blocks/hardened_clay*.png",
+    "blocks/glass_*.png",
+    "blocks/planks_*.png",
+    "blocks/log_*.png",
+    "blocks/leaves_*.png",
+    "blocks/*sandstone*.png",
+    "blocks/*sand.png",
+    "blocks/gravel.png",
+    "blocks/dirt*.png",
+    "blocks/coarse_dirt.png",
+    "blocks/grass_*.png",
+    "blocks/stone*.png",
+    "blocks/cobblestone_mossy.png",
+    "blocks/brick.png",
+    "blocks/quartz_block_*.png",
+    "blocks/*_block*.png",
+    "blocks/snow.png",
+    "blocks/ice*.png",
+    "blocks/water_*",
+    "blocks/lava_*",
+    "blocks/tnt_*.png",
+    "blocks/ladder.png",
+    "blocks/vine.png",
+    "blocks/iron_bars.png",
+    "blocks/end_stone.png",
+    "blocks/bedrock.png",
+    "blocks/netherrack.png",
+    "blocks/nether_brick.png",
+    "blocks/soul_sand.png",
+    "blocks/glowstone.png",
+    "blocks/clay.png",
+    "blocks/slime.png",
+    "blocks/sponge*.png",
+    "blocks/bookshelf.png",
+    "blocks/crafting_table_*.png",
+    "blocks/furnace_*.png",
+    "blocks/enchanting_table_*.png",
+    "blocks/anvil_*.png",
+    "blocks/brewing_stand*.png",
+    "blocks/beacon.png",
+    "blocks/mob_spawner.png",
+    "blocks/torch_on.png",
+    "blocks/door_*.png",
+    "blocks/trapdoor.png",
+    "blocks/pumpkin_*.png",
+    "blocks/melon_*.png",
+    "blocks/tallgrass.png",
+    "blocks/destroy_stage_*.png",
+    # Mobs, jogadores, baús, placas, flechas no chão...
+    "entity/*",
+    # Céu, nuvens, chuva, partículas, cores do bioma
+    "environment/*",
+    "particle/*",
+    "colormap/*",
+    # Menus e textos
+    "gui/*",
+    "misc/*",
+    "font/ascii.png",
+    "map/*",
+    "painting/*",
 ]
 
 # Nomes de outras versões que não funcionam no 1.8 (erro comum ao copiar

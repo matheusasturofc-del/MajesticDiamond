@@ -31,7 +31,10 @@ launcher oficial pelo menos uma vez, para o `.jar` existir em `.minecraft/versio
    ```
 
    Todas as texturas do jogo vão para `referencia/` (só para consulta, fica fora
-   do git) e as que importam no PvP são copiadas para dentro de `pack/`. Se o
+   do git) e as que importam no PvP são copiadas para dentro de `pack/`.
+   Troque `--pvp` por `--servidor` para levar também o resto do que aparece em
+   servidores: blocos de construção, lã, vidro colorido, céu, mobs, baús,
+   partículas, menus e todos os itens (cerca de 680 texturas). Se o
    `.jar` não for achado sozinho, use `--jar CAMINHO/1.8.9.jar`.
 
    Sem Python: abra o `1.8.9.jar` com o 7-Zip ou WinRAR e copie a pasta
