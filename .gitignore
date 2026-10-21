@@ -1,0 +1,5 @@
+# Texturas vanilla extraídas do seu .jar (não redistribuir)
+referencia/
+# Zip gerado pelo empacotar.py
+dist/
+__pycache__/
