@@ -40,7 +40,10 @@ launcher oficial pelo menos uma vez, para o `.jar` existir em `.minecraft/versio
    Sem Python: abra o `1.8.9.jar` com o 7-Zip ou WinRAR e copie a pasta
    `assets/minecraft/textures` para dentro de `pack/assets/minecraft/`.
 
-2. **Edite os PNGs dentro de `pack/`** no editor que preferir (Aseprite,
+2. **Edite os PNGs dentro de `pack/`**. O editor feito para este pack é o
+   [MyPixel](https://github.com/matheusasturofc-del/MyPixel): abre o .zip,
+   mostra várias texturas lado a lado e baixa o pack pronto. Também dá para
+   usar qualquer outro editor que salve PNG com transparência (Aseprite,
    Paint.NET, GIMP, Pixlr, LibreSprite...). Arquivo que você não quer mudar,
    apague do `pack/`: o jogo usa o original no lugar.
 
