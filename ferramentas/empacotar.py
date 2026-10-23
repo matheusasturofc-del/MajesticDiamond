@@ -131,6 +131,47 @@ def conferir_arquivos(rel, texturas_1_8):
     return arquivos
 
 
+def ler_properties(caminho):
+    valores = {}
+    for linha in caminho.read_text(encoding="utf-8", errors="replace").splitlines():
+        linha = linha.strip()
+        if linha and not linha.startswith("#") and "=" in linha:
+            chave, _, valor = linha.partition("=")
+            valores[chave.strip()] = valor.strip()
+    return valores
+
+
+def conferir_ceu(rel):
+    """Skybox do OptiFine: assets/minecraft/mcpatcher/sky/world<N>/sky<N>.properties + imagem 3x2."""
+    pasta_mc = PACK / "assets" / "minecraft"
+    for mundo in sorted((pasta_mc / "mcpatcher" / "sky").glob("world*")):
+        numeros = sorted(int(p.stem[3:]) for p in mundo.glob("sky*.properties") if p.stem[3:].isdigit())
+        for anterior, numero in zip(numeros, numeros[1:]):
+            if numero != anterior + 1:
+                rel.aviso(mundo.relative_to(PACK).as_posix(),
+                          f"falta sky{anterior + 1}.properties; o OptiFine para de procurar no primeiro número que faltar")
+        for numero in numeros:
+            props = mundo / f"sky{numero}.properties"
+            nome = props.relative_to(PACK).as_posix()
+            fonte = ler_properties(props).get("source", f"./sky{numero}.png")
+            if fonte.startswith("./"):
+                imagem = mundo / fonte[2:]
+            elif fonte.startswith("~/"):
+                imagem = pasta_mc / "mcpatcher" / fonte[2:]
+            else:
+                imagem = pasta_mc / fonte.split(":", 1)[-1]
+            if not imagem.is_file():
+                rel.erro(nome, f"a imagem do céu {fonte} não existe")
+                continue
+            if Image is None:
+                continue
+            with Image.open(imagem) as img:
+                largura, altura = img.size
+            if largura * 2 != altura * 3:
+                rel.erro(imagem.relative_to(PACK).as_posix(),
+                         f"{largura}x{altura}; o céu precisa ter os 6 lados em 3x2 (largura = 1,5 x altura, ex.: 768x512)")
+
+
 def gerar_zip(arquivos):
     DIST.mkdir(exist_ok=True)
     destino = DIST / NOME_ZIP
@@ -163,6 +204,7 @@ def main():
     rel = Relatorio()
     conferir_mcmeta_do_pack(rel)
     arquivos = conferir_arquivos(rel, ler_lista_1_8())
+    conferir_ceu(rel)
 
     for msg in rel.avisos:
         print(f"  aviso: {msg}")

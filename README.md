@@ -14,7 +14,10 @@ pack/                      <- o resource pack (é isso que vira o .zip)
     models/armor/          <- armadura no corpo do jogador
     gui/                   <- mira, corações, hotbar, inventário
     misc/  environment/  font/
-moldes/                    <- mapas UV da armadura para desenhar por cima
+  assets/minecraft/mcpatcher/sky/world0/
+    sky1.png               <- o céu (skybox), 6 lados em 3x2
+    sky1.properties        <- como o céu aparece no jogo
+moldes/                    <- moldes da armadura e do céu para desenhar por cima
 ferramentas/               <- scripts para extrair, conferir e empacotar
 ```
 
@@ -131,6 +134,37 @@ antes de salvar: o que não for armadura tem que ficar transparente.
 - `diamond_layer_2.png`: calça (corpo + pernas)
 
 Para recriar os moldes: `python ferramentas/gerar_moldes.py`.
+
+### Céu (skybox)
+
+O céu azul do Minecraft não é uma imagem, então o jogo normal não deixa
+trocá-lo. O céu personalizado é um recurso do **OptiFine**, que já vem embutido
+no **Lunar Client** e no **Badlion**. Para quem joga sem OptiFine, o céu
+continua azul.
+
+O pack já vem com um céu de exemplo (noite roxa com horizonte turquesa e
+estrelas) em `pack/assets/minecraft/mcpatcher/sky/world0/sky1.png`. A imagem
+tem os 6 lados de uma caixa em volta do jogador, em 3 colunas x 2 linhas:
+
+```
+baixo | cima  | sul
+oeste | norte | leste
+```
+
+- Nos 4 lados (sul, oeste, norte, leste) o topo do quadrado é o céu e o meio
+  é o horizonte. O que fica abaixo do meio aparece abaixo do horizonte.
+- `moldes/ceu_guia.png` mostra o nome de cada lado, a linha do horizonte e onde
+  fica o norte nos lados de cima e de baixo. `moldes/ceu_molde.png` é o mesmo
+  molde sem texto, para desenhar por cima.
+- A imagem pode ter qualquer tamanho com proporção 3x2 (768x512, 1536x1024…).
+  O `empacotar.py` confere isso.
+- Pinte as emendas entre os lados com a mesma cor, senão aparecem "quinas" no céu.
+
+`sky1.properties` deixa o céu parado e aparecendo o dia todo, inclusive com
+chuva (`blend=replace`, `rotate=false`, `weather=clear rain thunder`). O sol e a
+lua continuam passando por cima; para escondê-los, deixe `environment/sun.png`
+e `environment/moon_phases.png` transparentes. Para recriar o céu de exemplo e os
+moldes: `python ferramentas/gerar_ceu.py --sobrescrever`.
 
 ### Resolução (16x, 32x, 64x...)
 
