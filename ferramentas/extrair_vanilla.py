@@ -5,12 +5,14 @@ Uso:
     python ferramentas/extrair_vanilla.py --jar CAMINHO   # .jar específico
     python ferramentas/extrair_vanilla.py --pvp           # também copia as texturas de PvP para pack/
     python ferramentas/extrair_vanilla.py --servidor      # PvP + lã, céu, mobs, menus e tudo de servidor
+    python ferramentas/extrair_vanilla.py --tudo          # todas as texturas do 1.8
 
 Tudo vai para referencia/ (fora do pack, ignorado pelo git). Com --pvp, as
 texturas mais importantes para PvP são copiadas para dentro de pack/ para
 você editar por cima. Com --servidor, vai junto o resto do que aparece em
-servidores (blocos de construção, lã, céu, mobs, menus, todos os itens). Arquivos que já existem no pack nunca são sobrescritos,
-a menos que você passe --sobrescrever.
+servidores (blocos de construção, lã, céu, mobs, menus, todos os itens). Com
+--tudo, vão todas as texturas do jogo. Arquivos que já existem no pack nunca
+são sobrescritos, a menos que você passe --sobrescrever.
 """
 
 import argparse
@@ -25,7 +27,8 @@ def main():
     parser.add_argument("--jar", type=Path, help="caminho do 1.8.x.jar (padrão: procura em .minecraft/versions)")
     parser.add_argument("--pvp", action="store_true", help="copia as texturas de PvP para dentro de pack/")
     parser.add_argument("--servidor", action="store_true", help="copia as de PvP e todo o resto usado em servidores")
-    parser.add_argument("--sobrescrever", action="store_true", help="com --pvp/--servidor, substitui arquivos que já existem no pack")
+    parser.add_argument("--tudo", action="store_true", help="copia todas as texturas do jogo para dentro de pack/")
+    parser.add_argument("--sobrescrever", action="store_true", help="com --pvp/--servidor/--tudo, substitui arquivos que já existem no pack")
     args = parser.parse_args()
 
     jar = args.jar or achar_jar()
@@ -42,10 +45,13 @@ def main():
         destino.write_bytes(dados)
     print(f"{len(texturas)} arquivos extraídos para {REFERENCIA}")
 
-    if not (args.pvp or args.servidor):
+    if not (args.pvp or args.servidor or args.tudo):
         return
 
-    padroes = TEXTURAS_PVP + (TEXTURAS_SERVIDOR if args.servidor else [])
+    if args.tudo:
+        padroes = ["*"]
+    else:
+        padroes = TEXTURAS_PVP + (TEXTURAS_SERVIDOR if args.servidor else [])
     selecionados = set()
     for padrao in padroes:
         encontrados = {n for n in texturas if fnmatch.fnmatchcase(n, padrao)}
